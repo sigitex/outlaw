@@ -1,6 +1,7 @@
 {
   "templates": [
     "profile/library",
+    "workflow/mirror",
     "adapts-to/bun",
     "adapts-to/cloudflare"
   ],

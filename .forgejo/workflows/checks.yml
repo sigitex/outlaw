@@ -1,0 +1,27 @@
+name: Checks
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: https://${{ secrets.FORGE_TOKEN }}@code.quickbasic.org/sigitex/regime/actions/checks@main
+
+  release:
+    runs-on: ubuntu-latest
+    needs: checks
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: https://${{ secrets.FORGE_TOKEN }}@code.quickbasic.org/sigitex/regime/actions/release@main
+        with:
+          gitea-token: ${{ secrets.FORGE_TOKEN }}
+          gitea-url: https://code.quickbasic.org
+          npm-token: ${{ secrets.NPM_TOKEN }}

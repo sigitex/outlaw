@@ -1,0 +1,10 @@
+{
+  "templates": [
+    "profile/library",
+    "adapts-to/bun",
+    "adapts-to/cloudflare"
+  ],
+  "vars": {
+    "repo": "outlaw"
+  }
+}

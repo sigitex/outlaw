@@ -1,0 +1,57 @@
+{
+  "name": "@sigitex/outlaw",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "Sigitex",
+    "url": "http://github.com/sigitex"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sigitex/outlaw.git"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./bun": "./src/bun/index.ts",
+    "./cloudflare": "./src/cloudflare/index.ts"
+  },
+  "types": "./src/index.ts",
+  "workspaces": {
+    "packages": [
+      "../toolkit/packages/*"
+    ]
+  },
+  "devDependencies": {
+    "semantic-release": "^25.0.3",
+    "@typescript/native-preview": "beta",
+    "oxfmt": "^0.47.0",
+    "oxlint": "^1.62.0",
+    "@cloudflare/workers-types": "^4.20250425.0",
+    "@types/bun": "^1.3.13",
+    "@types/fast-json-stable-stringify": "^2.1.2",
+    "@sigitex/ssjs": "workspace:*",
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "husky": "^9.1.7",
+    "multi-semantic-release": "^3.1.0",
+    "@markwylde/semantic-release-gitea": "^2.2.0",
+    "@semantic-release/exec": "^7.0.3"
+  },
+  "dependencies": {
+    "@sigitex/print": "workspace:*",
+    "fast-json-stable-stringify": "^2.1.0",
+    "sqlstring-sqlite": "^0.1.1"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "lint": "oxlint",
+    "check": "tsgo --build",
+    "test": "bun test --pass-with-no-tests --tsconfig-override tsconfig.test.json"
+  },
+  "files": [
+    "src"
+  ]
+}

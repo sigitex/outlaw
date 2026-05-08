@@ -2,7 +2,7 @@
  * @type {import('semantic-release').GlobalConfig}
  */
 module.exports = {
-  repositoryUrl: "https://code.quickbasic.org/sigitex/weapon.git",
+  repositoryUrl: "https://code.quickbasic.org/sigitex/outlaw.git",
   branches: ["main"],
   plugins: [
     "@semantic-release/commit-analyzer",

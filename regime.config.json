@@ -2,6 +2,7 @@
   "templates": [
     "profile/library",
     "workflow/mirror",
+    "workflow/publish-npm",
     "adapts-to/bun",
     "adapts-to/cloudflare"
   ],

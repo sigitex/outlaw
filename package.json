@@ -2,6 +2,7 @@
   "name": "@sigitex/outlaw",
   "type": "module",
   "license": "MIT",
+  "description": "A trigger-happy sqlite framework.",
   "author": {
     "name": "Sigitex",
     "url": "http://github.com/sigitex"

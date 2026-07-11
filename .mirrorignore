@@ -1,3 +1,10 @@
 AGENTS.md
 .forgejo
 openspec
+.ai
+.internal
+CLAUDE.md
+templates/internal
+opencode.json
+regime.internal.json
+skills-lock.json

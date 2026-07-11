@@ -5,11 +5,11 @@
   "description": "A trigger-happy sqlite framework.",
   "author": {
     "name": "Sigitex",
-    "url": "http://github.com/sigitex"
+    "url": "https://github.com/sigitex"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sigitex/outlaw.git"
+    "url": "git+https://github.com/sigitex/outlaw.git"
   },
   "exports": {
     ".": {

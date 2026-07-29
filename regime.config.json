@@ -4,7 +4,8 @@
     "workflow/mirror",
     "workflow/publish-npm",
     "adapts-to/bun",
-    "adapts-to/cloudflare"
+    "adapts-to/cloudflare",
+    "profile/workspace"
   ],
   "vars": {
     "repo": "outlaw"

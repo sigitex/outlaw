@@ -51,6 +51,7 @@ CowboyConnection (intercepts first query, auto-migrates) → Connection.execute(
 
 > Note: this is out of date
 
+- `strict` and `ANY`
 - **INSERT/UPDATE conflict clauses** — `OR REPLACE`, `OR IGNORE`, etc. not yet supported
 - **Migration edge cases** — `hack.renamed.table().to()` partially stubbed, `hack.dropped.table()` unused
 - **Future features** — views, indexes, column check constraints, seed data, type mappings (boolean/JSON/timestamp/date), versioned migrations

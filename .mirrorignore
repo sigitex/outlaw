@@ -8,3 +8,5 @@ templates/internal
 opencode.json
 regime.internal.json
 skills-lock.json
+.agents
+CONTEXT.md

@@ -13,10 +13,11 @@ export class DatabaseView implements ViewApi<any> {
   }
 
   select(all: "*"): Select<any, any>
-  select<Column extends string>(columns: Column[]): Select<Pick<any, any>, any>
-  select(
-    columns: "*" | string[],
-  ): Select<any, any> | Select<Pick<any, any>, any> {
-    return new SelectBuilder(this.connection, this.tableData, columns)
+  select<Column extends string>(
+    ...columns: Column[]
+  ): Select<Pick<any, any>, any>
+  select(...columns: ("*" | string)[]): Select<any, any> {
+    const selected = columns[0] === "*" || columns.length === 0 ? "*" : columns
+    return new SelectBuilder(this.connection, this.tableData, selected)
   }
 }

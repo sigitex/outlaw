@@ -24,13 +24,15 @@ export class UpdateBuilder implements Update<any, any> {
 
   async execute(): Promise<any> {
     const result = await this.connection.query(generateUpdate(this.command))
-    return this.command.returning ? Mappings.results(this.table, result) : result
+    return this.command.returning
+      ? Mappings.results(this.table, result)
+      : result
   }
 
   returning(all: "*"): Update<any, any[]>
-  returning(columns: string[]): Update<any, Pick<any, any>[]>
-  returning(columns: any): Update<any, any[]> | Update<any, Pick<any, any>[]> {
-    this.command.returning = columns === "*" ? ["*"] : columns
+  returning(...columns: string[]): Update<any, Pick<any, any>[]>
+  returning(...columns: ("*" | string)[]): Update<any, any[]> {
+    this.command.returning = columns[0] === "*" ? ["*"] : columns
     return this
   }
 

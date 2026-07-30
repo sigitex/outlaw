@@ -1,5 +1,12 @@
 // oxlint-disable typescript/no-explicit-any
-import type { Delete, Connection, Insert, Select, TableApi, Update } from "./api.types"
+import type {
+  Delete,
+  Connection,
+  Insert,
+  Select,
+  TableApi,
+  Update,
+} from "./api.types"
 import type { TableData } from "../schemaBuilder"
 import {
   DeleteBuilder,
@@ -18,27 +25,32 @@ export class DatabaseTable implements TableApi<any> {
   }
 
   select(all: "*"): Select<any, any>
-  select<Column extends string>(columns: Column[]): Select<Pick<any, any>, any>
-  select(
-    columns: "*" | string[],
-  ): Select<any, any> | Select<Pick<any, any>, any> {
-    return new SelectBuilder(this.connection, this.table, columns)
+  select<Column extends string>(
+    ...columns: Column[]
+  ): Select<Pick<any, any>, any>
+  select(...columns: ("*" | string)[]): Select<any, any> {
+    const selected = columns[0] === "*" || columns.length === 0 ? "*" : columns
+    return new SelectBuilder(this.connection, this.table, selected)
   }
 
-  insert(row: Partial<any>): Insert<any, any, number>
-  insert<Column extends string | number | symbol>(
-    columns: Column[],
-    rows: Pick<any, Column>[],
-  ): Insert<Column, any, number>
-  insert(
-    columnsOrRow: any,
-    rows?: any,
-  ): Insert<any, any, number> | Insert<any, any, number> {
-    if (rows) {
-      return new InsertBuilder(this.connection, this.table, columnsOrRow, rows)
+  insert(...rows: [Partial<any>, ...Partial<any>[]]): Insert<any, any, number>
+  insert(...rows: Record<string, unknown>[]): Insert<any, any, number> {
+    const first = rows[0]
+    if (!first) {
+      throw new Error("insert() requires at least one row")
     }
-    const row = columnsOrRow as Record<string, unknown>
-    return new InsertBuilder(this.connection, this.table, Object.keys(row), [row])
+    const columns = Object.keys(first)
+    const expected = new Set(columns)
+    for (const row of rows.slice(1)) {
+      const rowColumns = Object.keys(row)
+      if (
+        rowColumns.length !== columns.length ||
+        rowColumns.some((column) => !expected.has(column))
+      ) {
+        throw new Error("insert() rows must use the same columns")
+      }
+    }
+    return new InsertBuilder(this.connection, this.table, columns, rows)
   }
 
   update(row: Partial<any>): Update<any, number> {

@@ -20,13 +20,15 @@ export class DeleteBuilder implements Delete<any, any> {
 
   async execute(): Promise<any> {
     const result = await this.connection.query(generateDelete(this.command))
-    return this.command.returning ? Mappings.results(this.table, result) : result
+    return this.command.returning
+      ? Mappings.results(this.table, result)
+      : result
   }
 
   returning(all: "*"): Delete<any, any[]>
-  returning(columns: string[]): Delete<any, Pick<any, any>[]>
-  returning(columns: any): Delete<any, any[]> | Delete<any, Pick<any, any>[]> {
-    this.command.returning = columns === "*" ? ["*"] : columns
+  returning(...columns: string[]): Delete<any, Pick<any, any>[]>
+  returning(...columns: ("*" | string)[]): Delete<any, any[]> {
+    this.command.returning = columns[0] === "*" ? ["*"] : columns
     return this
   }
 

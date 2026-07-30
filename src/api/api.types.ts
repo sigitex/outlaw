@@ -1,5 +1,4 @@
-// oxlint-disable typescript/consistent-type-definitions typescript/method-signature-style typescript/unified-signatures
-// oxlint-disable typescript/no-explicit-any
+// oxlint-disable typescript/no-explicit-any typescript/method-signature-style typescript/consistent-type-definitions
 import type { BINARY_OPERATORS, UNARY_OPERATORS } from "../queryBuilder"
 import type {
   BuildTable,
@@ -28,13 +27,6 @@ export type InsertRecord<R> = Partial<R> &
 
 export type ColumnsOf<BT> =
   BT extends BuildTable<infer Columns> ? Columns : never
-
-// export type ColumnTypeOf<BC> =
-//   BC extends BuildColumn<infer Type, infer Constraints>
-//     ? Constraints extends "notNull" | "primaryKey"
-//       ? Type
-//       : Type | null
-//     : never
 
 export type ColumnTypesOf<BCS> = {
   readonly [BCK in keyof BCS]: InferColumn<BCS[BCK]>
@@ -79,7 +71,7 @@ export type TableApi<Columns> = {
   ): Select<Pick<Columns, Column>, Columns>
   /** Issue an `INSERT` statement. */
   insert<InsertColumns extends Partial<ColumnTypesOf<Columns>>>(
-    ...rows: InsertColumns[]
+    ...rows: [InsertColumns, ...InsertColumns[]]
   ): Insert<InsertColumns, Columns, number>
   /** Issue an `UPDATE` statement. */
   update(row: Partial<ColumnTypesOf<Columns>>): Update<Columns, number>
@@ -92,7 +84,7 @@ export interface HasWhereClause<Columns> {
   /** Add a condition where the given column equals the given value. */
   where<Column extends keyof Columns>(
     column: Column,
-    value: Columns[Column],
+    value: InferColumn<Columns[Column]>,
   ): this
   /** Add a unary `WHERE` condition. */
   where<Column extends keyof Columns>(
@@ -180,11 +172,11 @@ export interface Update<Columns, Returning> extends HasWhereClause<Columns> {
   /** Execute the statement. */
   execute(): Promise<Returning>
   /** Specify a `RETURNING *` clause. */
-  returning(all: "*"): Update<Columns, Columns[]>
+  returning(all: "*"): Update<Columns, ColumnTypesOf<Columns>[]>
   /** Specify a `RETURNING` clause with the chosen columns. */
   returning<Column extends keyof Columns>(
-    columns: Column[],
-  ): Update<Columns, Pick<Columns, Column>[]>
+    ...columns: Column[]
+  ): Update<Columns, ColumnTypesOf<Pick<Columns, Column>>[]>
 }
 
 /** Delete statement API. */
@@ -192,11 +184,11 @@ export interface Delete<Columns, Returning> extends HasWhereClause<Columns> {
   /** Execute the statement. */
   execute(): Promise<Returning>
   /** Specify a `RETURNING *` clause. */
-  returning(all: "*"): Delete<Columns, Columns[]>
+  returning(all: "*"): Delete<Columns, ColumnTypesOf<Columns>[]>
   /** Specify a `RETURNING` clause with the chosen columns. */
   returning<Column extends keyof Columns>(
-    columns: Column[],
-  ): Delete<Columns, Pick<Columns, Column>[]>
+    ...columns: Column[]
+  ): Delete<Columns, ColumnTypesOf<Pick<Columns, Column>>[]>
 }
 
 export type UnaryOperator = ElementOf<typeof UNARY_OPERATORS>

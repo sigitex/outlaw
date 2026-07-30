@@ -1,11 +1,11 @@
-// oxlint-disable typescript/consistent-type-definitions
+// oxlint-disable typescript/consistent-type-definitions typescript/method-signature-style typescript/unified-signatures
 // oxlint-disable typescript/no-explicit-any
 import type { BINARY_OPERATORS, UNARY_OPERATORS } from "../queryBuilder"
 import type {
-  BuildColumn,
   BuildTable,
   BuildView,
   ColumnRef,
+  InferColumn,
   SchemaMembers,
   TablesOf,
   ViewsOf,
@@ -29,15 +29,15 @@ export type InsertRecord<R> = Partial<R> &
 export type ColumnsOf<BT> =
   BT extends BuildTable<infer Columns> ? Columns : never
 
-export type ColumnTypeOf<BC> =
-  BC extends BuildColumn<infer Type, infer Constraints>
-    ? Constraints extends "notNull" | "primaryKey"
-      ? Type
-      : Type | null
-    : never
+// export type ColumnTypeOf<BC> =
+//   BC extends BuildColumn<infer Type, infer Constraints>
+//     ? Constraints extends "notNull" | "primaryKey"
+//       ? Type
+//       : Type | null
+//     : never
 
 export type ColumnTypesOf<BCS> = {
-  readonly [BCK in keyof BCS]: ColumnTypeOf<BCS[BCK]>
+  readonly [BCK in keyof BCS]: InferColumn<BCS[BCK]>
 }
 
 // API
@@ -58,7 +58,8 @@ export type DatabaseApi<M extends SchemaMembers> = {
   readonly connection: Connection
 }
 
-export type ColumnsOfView<BV> = BV extends BuildView<infer Columns> ? Columns : never
+export type ColumnsOfView<BV> =
+  BV extends BuildView<infer Columns> ? Columns : never
 
 export type ViewApi<Columns> = {
   /** Issue a `SELECT *` query to the API. */
@@ -102,13 +103,15 @@ export interface HasWhereClause<Columns> {
   where<Column extends keyof Columns>(
     column: Column,
     operator: BinaryOperator,
-    value: ColumnTypeOf<Columns[Column]>,
+    value: InferColumn<Columns[Column]>,
   ): this
 }
 
 /** Select query API. */
-export interface Select<SelectColumns, Columns>
-  extends HasWhereClause<Columns> {
+export interface Select<
+  SelectColumns,
+  Columns,
+> extends HasWhereClause<Columns> {
   /** Issue the query, expecting an array of results. */
   fetch(): Promise<ColumnTypesOf<SelectColumns>[]>
   /** Issue the query, returning a single result, or throwing.. */

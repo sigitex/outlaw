@@ -1,13 +1,22 @@
 {
+  "sources": {
+    "sigitex": "../templates"
+  },
   "templates": [
-    "profile/library",
-    "workflow/mirror",
-    "workflow/publish-npm",
-    "adapts-to/bun",
-    "adapts-to/cloudflare",
-    "profile/workspace"
+    "sigitex:project/workspace",
+    "sigitex:project/library",
+    "sigitex:workflow/mirror",
+    "sigitex:workflow/publish-npm",
+    "sigitex:adapts-to/bun",
+    "sigitex:adapts-to/cloudflare",
+    "sigitex:tool/vibes",
+    "sigitex:tool/oxc",
+    "sigitex:tool/commitlint",
+    "sigitex:tool/husky"
   ],
   "vars": {
-    "repo": "outlaw"
+    "repo": "outlaw",
+    "license": "MIT",
+    "copyright": "Sigitex"
   }
 }

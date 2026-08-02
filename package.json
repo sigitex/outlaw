@@ -5,7 +5,7 @@
   "description": "A trigger-happy sqlite framework.",
   "author": {
     "name": "Sigitex",
-    "url": "https://github.com/sigitex"
+    "url": "https://sigitex.com"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,6 @@
   "types": "./src/index.ts",
   "devDependencies": {
     "semantic-release": "^25.0.3",
-    "@typescript/native-preview": "beta",
     "oxfmt": "^0.47.0",
     "oxlint": "^1.62.0",
     "@cloudflare/workers-types": "^4.20250425.0",
@@ -33,7 +32,8 @@
     "husky": "^9.1.7",
     "multi-semantic-release": "^3.1.0",
     "@markwylde/semantic-release-gitea": "^2.2.0",
-    "@semantic-release/exec": "^7.0.3"
+    "@semantic-release/exec": "^7.0.3",
+    "typescript": "^7.0.2"
   },
   "dependencies": {
     "@sigitex/print": "*",
@@ -43,7 +43,7 @@
   "scripts": {
     "prepare": "husky",
     "lint": "oxlint",
-    "check": "tsgo --build",
+    "check": "tsc --build",
     "test": "bun test --pass-with-no-tests --tsconfig-override tsconfig.test.json"
   },
   "files": [

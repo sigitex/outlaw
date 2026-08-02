@@ -20,5 +20,11 @@ export default defineConfig({
         printWidth: 60,
       },
     },
+    {
+      files: ["**/*.tsx"],
+      options: {
+        printWidth: 70,
+      },
+    },
   ],
 })

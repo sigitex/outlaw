@@ -65,16 +65,6 @@ main
 
 Do not create duplicate PRs. Check branch/PR state first when feasible.
 
-## Buff Sync Mode
-
-Buff sync is stricter than normal sync:
-
-- Discover the original PR and branch for the original OpenSpec change before editing.
-- Use the original PR branch only.
-- If the original PR is missing, merged, closed, or cannot be identified, automatically return local fallback to the caller before edits begin.
-- In local fallback, do not push, create PRs, or use forge write tools.
-- In path-sync mode (path target + `--sync --pr <number>`), treat the specified PR as the original PR. Push to that PR's branch only, comment on that PR only, never create a new PR, and return local fallback if the PR is closed, merged, missing, or cannot be identified.
-
 ## Checkpoint Procedure
 
 When caller says a unit is complete:

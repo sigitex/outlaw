@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: https://${{ secrets.FORGE_TOKEN }}@code.quickbasic.org/sigitex/regime/actions/mirror@main
+      - uses: https://${{ secrets.FORGE_TOKEN }}@code.quickbasic.org/sigitex/actions/mirror@main
         with:
           target: sigitex/outlaw
           token: ${{ secrets.MIRROR_TOKEN }}

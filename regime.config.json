@@ -12,7 +12,8 @@
     "sigitex:tool/vibes",
     "sigitex:tool/oxc",
     "sigitex:tool/commitlint",
-    "sigitex:tool/husky"
+    "sigitex:tool/husky",
+    "sigitex:license/mit"
   ],
   "vars": {
     "repo": "outlaw",

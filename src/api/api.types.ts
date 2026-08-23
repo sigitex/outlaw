@@ -1,4 +1,6 @@
-// oxlint-disable typescript/no-explicit-any typescript/method-signature-style typescript/consistent-type-definitions
+// oxlint-disable typescript/no-explicit-any
+// oxlint-disable typescript/method-signature-style
+// oxlint-disable typescript/consistent-type-definitions
 import type { BINARY_OPERATORS, UNARY_OPERATORS } from "../queryBuilder"
 import type {
   BuildTable,

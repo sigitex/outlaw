@@ -13,8 +13,12 @@
   ],
   "compilerOptions": {
     "composite": true,
-    "types": ["bun"]
+    "types": [
+      "bun"
+    ]
   },
-  "include": ["tests"],
+  "include": [
+    "tests"
+  ],
   "files": []
 }

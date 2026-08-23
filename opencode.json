@@ -12,12 +12,12 @@
   "command": {
     "sketch": {
       "description": "Apply an approved OpenSpec change",
-      "template": "@.ai/commands/sketch.md\n\nArguments: $ARGUMENTS",
+      "template": "@.agents/commands/sketch.md\n\nArguments: $ARGUMENTS",
       "agent": "build"
     },
     "sketch-sync": {
       "description": "Apply an approved OpenSpec change and sync Forgejo",
-      "template": "@.ai/commands/sketch.md\n\nMode: sync\nArguments: $ARGUMENTS",
+      "template": "@.agents/commands/sketch.md\n\nMode: sync\nArguments: $ARGUMENTS",
       "agent": "build"
     }
   }

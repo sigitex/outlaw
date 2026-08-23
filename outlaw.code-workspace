@@ -20,7 +20,7 @@
 			"tsconfig.json": "tsconfig.*.json",
 			"package.json": "bun.lock, bunfig.toml, *.bun.plugin.ts, ox*.config.ts, .gitignore, commitlint.config.*, release.config.*js, hypeup.config.*",
 			"vite.config.ts": "*.vite.plugin.ts",
-			"README.md": "LICENSE, LICENSE.md",
+			"README.md": "LICENSE, *.md",
 		},
 	},
 }

@@ -36,18 +36,42 @@ export type ColumnTypesOf<BCS> = {
 
 export type DefaultRow = Record<string, unknown>
 
-export type Connection = {
+export type ConnectionOperations = {
   readonly query: <Row = DefaultRow>(sql: string) => Promise<Row[]>
   readonly script: (statements: string[]) => Promise<void>
-  readonly reset?: () => Promise<void>
 }
 
-export type DatabaseApi<M extends SchemaMembers> = {
+export type TransactionWork<Result> = (
+  connection: TransactionalConnection,
+) => Promise<Result>
+
+export type Transaction = <Result>(
+  work: TransactionWork<Result>,
+) => Promise<Result>
+
+export type TransactionalConnection = ConnectionOperations & {
+  readonly transaction: Transaction
+}
+
+export type Connection = ConnectionOperations & {
+  readonly reset?: () => Promise<void>
+  readonly transaction?: Transaction
+}
+
+export type DatabaseApi<
+  M extends SchemaMembers,
+  C extends Connection = Connection,
+> = {
   readonly [K in keyof TablesOf<M>]: TableApi<ColumnsOf<TablesOf<M>[K]>>
 } & {
   readonly [K in keyof ViewsOf<M>]: ViewApi<ColumnsOfView<ViewsOf<M>[K]>>
 } & {
-  readonly connection: Connection
+  readonly connection: C
+  readonly transaction: <Result>(
+    work: (
+      database: DatabaseApi<M, TransactionalConnection>,
+    ) => Promise<Result>,
+  ) => Promise<Result>
 }
 
 export type ColumnsOfView<BV> =

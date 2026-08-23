@@ -155,6 +155,9 @@ Outlaw abstracts over any SQLite connection via the `Connection` interface:
 type Connection = {
   query<Row>(sql: string): Promise<Row[]>
   script(statements: string[]): Promise<void>
+  transaction?<Result>(
+    work: (connection: TransactionalConnection) => Promise<Result>,
+  ): Promise<Result>
 }
 ```
 
@@ -187,6 +190,25 @@ import { createDatabase } from "@sigitex/outlaw"
 
 const db = createDatabase(connection, schema)
 ```
+
+Every database API exposes `transaction`. Supported connections provide a fresh
+database API bound to the transaction-scoped connection:
+
+```ts
+await db.transaction(async (tx) => {
+  await tx.users.insert({ name: "Wyatt" }).execute()
+
+  await tx.transaction(async (nested) => {
+    await nested.products.insert({ name: "Hat" }).execute()
+  })
+})
+```
+
+Use only the callback's scoped database API until that callback ends. Bun
+serializes root operations, uses `BEGIN IMMEDIATE`, and implements nested
+callbacks with savepoints. Cloudflare D1 does not support interactive callback
+transactions; `transaction` throws `UnsupportedTransactionError` before the
+callback runs, while `script()` remains available through D1 batch.
 
 ### Select
 

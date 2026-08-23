@@ -8,7 +8,7 @@ bun add @sigitex/outlaw
 
 Attempts to mirror Sqlite syntax *very* closely. Currently works with Bun and Cloudflare Functions.
 
-Define your schema in code, and Outlaw's [cowboy migrations](#cowboy-migrations) automatically diff and converge your database on startup -- no migration files, no CLI steps. Just change your schema and go.
+Define your schema in code, and Outlaw's [cowboy migrations](#cowboy-migrations) automatically diff and converge your database on startup.
 
 > **Note:** This package exports TypeScript sources directly. A TypeScript-compatible runtime or bundler (Bun, etc.) is required.
 

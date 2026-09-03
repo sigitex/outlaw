@@ -67,6 +67,8 @@ export default defineConfig({
     "typescript/prefer-function-type": "off",
     "unicorn/no-process-exit": "off",
     "unicorn/prefer-string-raw": "off",
+    "unicorn/relative-url-style": "off",
+    "unicorn/require-post-message-target-origin": "off",
     "unicorn/text-encoding-identifier-case": "off",
   },
   overrides: [

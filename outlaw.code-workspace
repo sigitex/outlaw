@@ -4,6 +4,10 @@
 			"name": "outlaw",
 			"path": ".",
 		},
+		{
+			"name": "project",
+			"path": "../outlaw.project",
+		},
 	],
 	"settings": {
 		"oxc.path.oxfmt": "node_modules/.bin/oxfmt",

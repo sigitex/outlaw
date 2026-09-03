@@ -9,7 +9,6 @@
     "sigitex:workflow/publish-npm",
     "sigitex:adapts-to/bun",
     "sigitex:adapts-to/cloudflare",
-    "sigitex:tool/vibes",
     "sigitex:tool/oxc",
     "sigitex:tool/commitlint",
     "sigitex:tool/husky",

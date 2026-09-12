@@ -28,13 +28,13 @@ export namespace Clause {
   }
 
   export function identifier(column: ColumnIdentifier): string {
-    return column.table === undefined ? Format.name(column.column) : `${Format.name(column.table)}.${Format.name(column.column)}`
+    return column.table === undefined ? Format.identifier(column.column) : `${Format.identifier(column.table)}.${Format.identifier(column.column)}`
   }
 
   export function source(target: JoinTarget): Node {
     return [
-      target.kind === "table" ? Format.name(target.name) : ["(", newline, indent([generateSelectNode(target.query)]), ")"],
-      target.alias !== undefined && [" as ", Format.name(target.alias)],
+      target.kind === "table" ? Format.identifier(target.name) : ["(", newline, indent([generateSelectNode(target.query)]), ")"],
+      target.alias !== undefined && [" as ", Format.identifier(target.alias)],
     ]
   }
 
@@ -56,7 +56,7 @@ export namespace Clause {
               newline,
             ]),
           ),
-        clause.using?.length && ["using (", join(", ", clause.using, Format.name), ")", newline],
+        clause.using?.length && ["using (", join(", ", clause.using, Format.identifier), ")", newline],
       ]
     })
   }

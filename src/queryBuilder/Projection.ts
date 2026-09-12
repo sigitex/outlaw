@@ -11,9 +11,12 @@ export namespace Projection {
   export function create(scope: Source.Scope, input: Input): Projection {
     if (input === "*") return input
     if (typeof input === "object" && "wildcard" in input) return { ...input }
+    const column = Source.identifier(scope, input)
+    const alias = typeof input === "object" && "alias" in input ? input.alias
+      : column.table === undefined && scope.coalesced.has(column.column) ? column.column : undefined
     return {
-      column: Source.identifier(scope, input),
-      ...(typeof input === "object" && "alias" in input ? { alias: input.alias } : {}),
+      column,
+      ...(alias !== undefined ? { alias } : {}),
     }
   }
 

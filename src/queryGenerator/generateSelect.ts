@@ -12,8 +12,8 @@ export function generateSelectNode(query: SelectQuery): Node {
     "select ",
     join(", ", query.selected, projection => {
       if (projection === "*") return "*"
-      if ("wildcard" in projection) return [Format.name(projection.table), ".*"]
-      return [Clause.identifier(projection.column), projection.alias !== undefined && [" as ", Format.name(projection.alias)]]
+      if ("wildcard" in projection) return [Format.identifier(projection.table), ".*"]
+      return [Clause.identifier(projection.column), projection.alias !== undefined && [" as ", Format.identifier(projection.alias)]]
     }),
     newline,
     "from ", Clause.source(query.source), newline,

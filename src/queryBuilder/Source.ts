@@ -23,7 +23,7 @@ export namespace Source {
 
   export type Target = { readonly $type: QueryScope.State }
   export type Input = { readonly $source: Data } | { readonly query: SelectQuery }
-  export type Scope = { sources: Data[]; output: ColumnData[] }
+  export type Scope = { sources: Data[]; output: ColumnData[]; coalesced: Set<string> }
 
   export function create(data: Data, connection?: Connection): Source<string, QueryScope.Columns> {
     const source = snapshotSource(data)
@@ -72,6 +72,7 @@ export namespace Source {
   export function scope(query: SelectQuery): Scope {
     let sources = [query.source]
     let output = query.source.tableData.columns.slice()
+    const coalesced = new Set<string>()
     for (const clause of query.joins ?? []) {
       const right = clause.target
       const leftOutput = output
@@ -85,6 +86,10 @@ export namespace Source {
       sources.push(incoming)
       if (clause.using?.length) {
         const common = new Set(clause.using)
+        for (const name of common) {
+          if (clause.type === "full join") coalesced.add(name)
+          else if (clause.type === "right join") coalesced.delete(name)
+        }
         output = output.map(column => {
           if (!common.has(column.name)) return column
           const left = leftOutput.find(candidate => candidate.name === column.name)!
@@ -98,7 +103,7 @@ export namespace Source {
         output.push(...incoming.tableData.columns)
       }
     }
-    return { sources, output }
+    return { sources, output, coalesced }
   }
 
   export function identifier(scope: Scope, input: string | ColumnRef): ColumnIdentifier {

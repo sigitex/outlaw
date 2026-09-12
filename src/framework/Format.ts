@@ -11,6 +11,10 @@ export namespace Format {
     return SqlString.escapeId(name)
   }
 
+  export function identifier(name: string) {
+    return SqlString.escapeId(name, true)
+  }
+
   export function number(number: number) {
     if (typeof number !== "number" && typeof number !== "bigint") {
       throw new Error("Not a number.")

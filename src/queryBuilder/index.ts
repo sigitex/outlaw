@@ -1,4 +1,6 @@
 export * from "./queryBuilders.types"
+export * from "./QueryScope"
+export * from "./Source"
 export * from "./operators"
 export * from "./SelectQueryBuilder"
 export * from "./SelectBuilder"

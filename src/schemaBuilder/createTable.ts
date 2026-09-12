@@ -1,15 +1,15 @@
-import type { ColumnData, ColumnRef, TableData } from "./metadata"
+import type { ColumnData, TableData } from "./metadata"
 import type {
   BuildColumns,
   BuildColumnInner,
   BuildTable,
 } from "./schemaBuilder.types"
-import { SelectQueryBuilder } from "../queryBuilder/SelectQueryBuilder"
+import { Source } from "../queryBuilder/Source"
 
-export function createTable<Columns extends BuildColumns>(
-  name: string,
+export function createTable<Columns extends BuildColumns, Name extends string>(
+  name: Name,
   defineColumns: Columns,
-): BuildTable<Columns> {
+): BuildTable<Columns, Name> {
   const columns = Object.entries(defineColumns).map<ColumnData>(
     ([name, define]) => {
       const meta = (define as BuildColumnInner).$meta
@@ -41,17 +41,9 @@ export function createTable<Columns extends BuildColumns>(
       })
     },
   })
-  function select(...columns: ("*" | string)[]) {
-    if (columns[0] === "*" || columns.length === 0) {
-      return new SelectQueryBuilder($meta, "*")
-    }
-    return new SelectQueryBuilder($meta, columns)
-  }
-  const defineTable = { $kind: "table" as const, $meta, by, primaryKey, unique, check, select } as unknown as BuildTable<Columns>
-  for (const col of Object.keys(defineColumns)) {
-    // oxlint-disable-next-line typescript/no-explicit-any
-    ;(defineTable as any)[col] = { table: name, column: col } satisfies ColumnRef
-  }
+  const defineTable = Object.assign(Source.create({ kind: "table", name, tableData: $meta }), {
+    $kind: "table" as const, $meta, by, primaryKey, unique, check,
+  }) as unknown as BuildTable<Columns, Name>
   return defineTable
 
   function primaryKey(...columns: (keyof Columns)[]) {

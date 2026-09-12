@@ -1,35 +1,34 @@
 // oxlint-disable typescript/consistent-type-definitions -- review
 import type { BinaryOperator, UnaryOperator } from "../api/api.types"
-import type { ColumnRef, TableData } from "../schemaBuilder"
+import type { Source } from "./Source"
+import type { Projection } from "./Projection"
+
+export type ColumnIdentifier = { table?: string; column: string }
+export type SelectCondition =
+  | (Omit<UnaryCondition, "column"> & { column: ColumnIdentifier })
+  | (Omit<BinaryCondition, "column"> & { column: ColumnIdentifier })
 
 /** Represents a select query. */
 export interface SelectQuery {
   /** Table this query is performed on. */
-  table: string
+  source: Source.Data
   /** Limit clause. */
   limit?: number
   /** Offset clause. */
   offset?: number
   /** Conditions of the SELECT. */
-  conditions?: Condition[]
+  conditions?: SelectCondition[]
   /** Which columns are being selected in this query. */
-  selected?: string[]
+  selected: Projection[]
   /** Order By clause */
-  orderBy?: OrderBySort[]
+  orderBy?: { column: ColumnIdentifier; direction: "asc" | "desc" }[]
   /** Join clauses. */
   joins?: JoinClause[]
 }
 
-export type JoinType = "join" | "left join" | "right join" | "cross join"
+export type JoinType = "join" | "left join" | "right join" | "full join" | "cross join"
 
-export type JoinTarget =
-  | { kind: "table"; name: string; tableData: TableData }
-  | {
-      kind: "subquery"
-      table: string
-      query: SelectQuery
-      tableData: TableData
-    }
+export type JoinTarget = Source.Data
 
 export interface JoinClause {
   /** The type of join. */
@@ -38,15 +37,16 @@ export interface JoinClause {
   target: JoinTarget
   /** Join conditions (ON clause). */
   on: JoinOn[]
+  using?: string[]
 }
 
 export interface JoinOn {
   /** Left side of the ON condition. */
-  left: ColumnRef
+  left: ColumnIdentifier
   /** The comparison operator. */
   operator: BinaryOperator
   /** Right side of the ON condition. */
-  right: ColumnRef
+  right: ColumnIdentifier
 }
 
 /** Represents an update command. */

@@ -3,34 +3,24 @@ import type {
   Delete,
   Connection,
   Insert,
-  Select,
-  TableApi,
   Update,
 } from "./api.types"
 import type { TableData } from "../schemaBuilder"
 import {
   DeleteBuilder,
   InsertBuilder,
-  SelectBuilder,
   UpdateBuilder,
 } from "../queryBuilder"
+import { SourceBuilder } from "../queryBuilder/SourceBuilder"
 
-export class DatabaseTable implements TableApi<any> {
-  private connection: Connection
+export class DatabaseTable extends SourceBuilder {
+  private readonly tableConnection: Connection
   private table: TableData
 
   constructor(connection: Connection, table: TableData) {
-    this.connection = connection
+    super({ kind: "table", name: table.name, tableData: table }, connection)
+    this.tableConnection = connection
     this.table = table
-  }
-
-  select(all: "*"): Select<any, any>
-  select<Column extends string>(
-    ...columns: Column[]
-  ): Select<Pick<any, any>, any>
-  select(...columns: ("*" | string)[]): Select<any, any> {
-    const selected = columns[0] === "*" || columns.length === 0 ? "*" : columns
-    return new SelectBuilder(this.connection, this.table, selected)
   }
 
   insert(...rows: [Partial<any>, ...Partial<any>[]]): Insert<any, any, number>
@@ -50,14 +40,14 @@ export class DatabaseTable implements TableApi<any> {
         throw new Error("insert() rows must use the same columns")
       }
     }
-    return new InsertBuilder(this.connection, this.table, columns, rows)
+    return new InsertBuilder(this.tableConnection, this.table, columns, rows)
   }
 
   update(row: Partial<any>): Update<any, number> {
-    return new UpdateBuilder(this.connection, this.table, row)
+    return new UpdateBuilder(this.tableConnection, this.table, row)
   }
 
   delete(): Delete<TableData, number> {
-    return new DeleteBuilder(this.connection, this.table)
+    return new DeleteBuilder(this.tableConnection, this.table)
   }
 }

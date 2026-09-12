@@ -49,7 +49,7 @@ function composeColumn(
         references(ref: ColumnRef) {
           return composeColumn({
             ...$meta,
-            foreignKey: ref,
+            foreignKey: { table: ref.table, column: ref.column },
           })
         },
       }

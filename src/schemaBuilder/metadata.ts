@@ -1,4 +1,5 @@
 // oxlint-disable typescript/no-explicit-any
+export type { ColumnRef } from "./ColumnRef"
 export type Text = "text"
 export type Integer = "integer"
 export type Real = "real"
@@ -30,12 +31,10 @@ export type ColumnData = {
   readonly check: CheckExpression | undefined
 }
 
-export type ColumnRef = {
+export type ForeignKeyData = {
   readonly table: string
   readonly column: string
 }
-
-export type ForeignKeyData = ColumnRef
 
 export type TableConstraintData = TablePrimaryKeyData | TableUniqueData | TableCheckData
 

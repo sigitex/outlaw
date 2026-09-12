@@ -3,14 +3,12 @@
 // oxlint-disable typescript/consistent-type-definitions
 import type { BINARY_OPERATORS, UNARY_OPERATORS } from "../queryBuilder"
 import type {
-  BuildTable,
-  BuildView,
-  ColumnRef,
   InferColumn,
   SchemaMembers,
   TablesOf,
   ViewsOf,
 } from "../schemaBuilder"
+import type { QueryScope } from "../queryBuilder/QueryScope"
 
 // Utilities
 
@@ -28,7 +26,7 @@ export type InsertRecord<R> = Partial<R> &
 // Deconstruction
 
 export type ColumnsOf<BT> =
-  BT extends BuildTable<infer Columns> ? Columns : never
+  BT extends { readonly $columns: infer Columns } ? Columns : never
 
 export type ColumnTypesOf<BCS> = {
   readonly [BCK in keyof BCS]: InferColumn<BCS[BCK]>
@@ -64,9 +62,9 @@ export type DatabaseApi<
   M extends SchemaMembers,
   C extends Connection = Connection,
 > = {
-  readonly [K in keyof TablesOf<M>]: TableApi<ColumnsOf<TablesOf<M>[K]>>
+  readonly [K in keyof TablesOf<M>]: TableApi<ColumnsOf<TablesOf<M>[K]>, QueryScope.Of<TablesOf<M>[K]>["name"]>
 } & {
-  readonly [K in keyof ViewsOf<M>]: ViewApi<ColumnsOfView<ViewsOf<M>[K]>>
+  readonly [K in keyof ViewsOf<M>]: ViewApi<QueryScope.Of<ViewsOf<M>[K]>["columns"], QueryScope.Of<ViewsOf<M>[K]>["name"]>
 } & {
   readonly connection: C
   readonly transaction: <Result>(
@@ -77,24 +75,11 @@ export type DatabaseApi<
 }
 
 export type ColumnsOfView<BV> =
-  BV extends BuildView<infer Columns> ? Columns : never
+  QueryScope.Of<BV>["columns"]
 
-export type ViewApi<Columns> = {
-  /** Issue a `SELECT *` query to the API. */
-  select(all: "*"): Select<Columns, Columns>
-  /** Issue a `SELECT` query to the API with the chosen columns. */
-  select<Column extends keyof Columns>(
-    ...columns: Column[]
-  ): Select<Pick<Columns, Column>, Columns>
-}
+export type ViewApi<Columns extends QueryScope.Columns, Name extends string = string> = QueryScope.Composition<QueryScope.Initial<QueryScope.State<Name, Columns>>, true>
 
-export type TableApi<Columns> = {
-  /** Issue a `SELECT *` query to the API. */
-  select(all: "*"): Select<Columns, Columns>
-  /** Issue a `SELECT` query to the API with the chosen columns. */
-  select<Column extends keyof Columns>(
-    ...columns: Column[]
-  ): Select<Pick<Columns, Column>, Columns>
+export type TableApi<Columns, Name extends string = string> = QueryScope.Composition<QueryScope.Initial<QueryScope.State<Name, QueryScope.SchemaColumns<Columns>>>, true> & {
   /** Issue an `INSERT` statement. */
   insert<InsertColumns extends Partial<ColumnTypesOf<Columns>>>(
     ...rows: [InsertColumns, ...InsertColumns[]]
@@ -125,61 +110,7 @@ export interface HasWhereClause<Columns> {
   ): this
 }
 
-/** Select query API. */
-export interface Select<
-  SelectColumns,
-  Columns,
-> extends HasWhereClause<Columns> {
-  /** Issue the query, expecting an array of results. */
-  fetch(): Promise<ColumnTypesOf<SelectColumns>[]>
-  /** Issue the query, returning a single result, or throwing.. */
-  first(): Promise<ColumnTypesOf<SelectColumns>>
-  /** Add a `LIMIT` clause. */
-  limit(n: number): this
-  /** Add an `OFFSET` clause. */
-  offset(n: number): this
-  /** Add an `ORDER BY` sort expression. */
-  orderBy(sorts: [keyof Columns, "asc" | "desc"][]): this
-
-  /** Inner join on a table. */
-  join<JC>(
-    table: BuildTable<JC>,
-  ): Select<SelectColumns & ColumnTypesOf<JC>, Columns & JC>
-  /** Inner join on a subquery. */
-  join<SC>(
-    query: Select<SC, any>,
-  ): Select<SelectColumns & ColumnTypesOf<SC>, Columns & SC>
-
-  /** Left join on a table — joined columns become nullable. */
-  leftJoin<JC>(
-    table: BuildTable<JC>,
-  ): Select<SelectColumns & Partial<ColumnTypesOf<JC>>, Columns & JC>
-  /** Left join on a subquery — joined columns become nullable. */
-  leftJoin<SC>(
-    query: Select<SC, any>,
-  ): Select<SelectColumns & Partial<ColumnTypesOf<SC>>, Columns & SC>
-
-  /** Right join on a table. */
-  rightJoin<JC>(
-    table: BuildTable<JC>,
-  ): Select<SelectColumns & ColumnTypesOf<JC>, Columns & JC>
-  /** Right join on a subquery. */
-  rightJoin<SC>(
-    query: Select<SC, any>,
-  ): Select<SelectColumns & ColumnTypesOf<SC>, Columns & SC>
-
-  /** Cross join on a table. */
-  crossJoin<JC>(
-    table: BuildTable<JC>,
-  ): Select<SelectColumns & ColumnTypesOf<JC>, Columns & JC>
-  /** Cross join on a subquery. */
-  crossJoin<SC>(
-    query: Select<SC, any>,
-  ): Select<SelectColumns & ColumnTypesOf<SC>, Columns & SC>
-
-  /** Add an ON condition to the most recent join. */
-  on(left: ColumnRef, operator: BinaryOperator, right: ColumnRef): this
-}
+export type Select<SelectColumns extends QueryScope.Columns, Scope extends QueryScope> = QueryScope.Selection<SelectColumns, Scope, true>
 
 /** Insert statement API. */
 export interface Insert<InsertColumns, Columns, Returning> {

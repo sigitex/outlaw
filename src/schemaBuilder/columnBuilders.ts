@@ -1,5 +1,10 @@
 // oxlint-disable typescript/no-explicit-any
-import type { CheckExpression, ColumnData, ColumnRef, MappingData } from "./metadata"
+import type {
+  CheckExpression,
+  ColumnData,
+  ColumnRef,
+  MappingData,
+} from "./metadata"
 import { Mapping } from "./Mapping"
 import type {
   BuildColumn,

@@ -22,10 +22,19 @@ export namespace Source {
   ) & { alias?: string; tableData: TableData }
 
   export type Target = { readonly $type: QueryScope.State }
-  export type Input = { readonly $source: Data } | { readonly query: SelectQuery }
-  export type Scope = { sources: Data[]; output: ColumnData[]; coalesced: Set<string> }
+  export type Input =
+    | { readonly $source: Data }
+    | { readonly query: SelectQuery }
+  export type Scope = {
+    sources: Data[]
+    output: ColumnData[]
+    coalesced: Set<string>
+  }
 
-  export function create(data: Data, connection?: Connection): Source<string, QueryScope.Columns> {
+  export function create(
+    data: Data,
+    connection?: Connection,
+  ): Source<string, QueryScope.Columns> {
     const source = snapshotSource(data)
     const name = qualifier(source)
     const result = Object.assign(new SourceBuilder(source, connection), {
@@ -36,7 +45,10 @@ export namespace Source {
       },
     })
     for (const column of source.tableData.columns) {
-      Object.defineProperty(result, column.name, { value: ColumnRef.create(name, column.name), enumerable: true })
+      Object.defineProperty(result, column.name, {
+        value: ColumnRef.create(name, column.name),
+        enumerable: true,
+      })
     }
     return result as unknown as Source<string, QueryScope.Columns>
   }
@@ -46,7 +58,15 @@ export namespace Source {
       return snapshotSource(input.$source)
     }
     const query = snapshot(input.query)
-    return { kind: "subquery", query, tableData: { name: "", columns: Projection.columns(query), constraints: [] } }
+    return {
+      kind: "subquery",
+      query,
+      tableData: {
+        name: "",
+        columns: Projection.columns(query),
+        constraints: [],
+      },
+    }
   }
 
   export function qualifier(source: Data): string {
@@ -57,27 +77,31 @@ export namespace Source {
     return {
       ...query,
       source: snapshotSource(query.source),
-      selected: query.selected.map(projection => projection === "*" ? projection : { ...projection }),
-      conditions: query.conditions?.map(condition => ({ ...condition })),
-      orderBy: query.orderBy?.map(sort => ({ ...sort })),
-      joins: query.joins?.map(clause => ({
+      selected: query.selected.map((projection) =>
+        projection === "*" ? projection : { ...projection },
+      ),
+      conditions: query.conditions?.map((condition) => ({ ...condition })),
+      orderBy: query.orderBy?.map((sort) => ({ ...sort })),
+      joins: query.joins?.map((clause) => ({
         ...clause,
         target: snapshotSource(clause.target),
-        on: clause.on.map(condition => ({ ...condition })),
-        using: clause.using?.slice(),
+        on: clause.on.map((condition) => ({ ...condition })),
+        using: clause.using ? [...clause.using] : undefined,
       })),
     }
   }
 
   export function scope(query: SelectQuery): Scope {
     let sources = [query.source]
-    let output = query.source.tableData.columns.slice()
+    let output = [...query.source.tableData.columns]
     const coalesced = new Set<string>()
     for (const clause of query.joins ?? []) {
       const right = clause.target
       const leftOutput = output
-      const extendLeft = clause.type === "right join" || clause.type === "full join"
-      const extendRight = clause.type === "left join" || clause.type === "full join"
+      const extendLeft =
+        clause.type === "right join" || clause.type === "full join"
+      const extendRight =
+        clause.type === "left join" || clause.type === "full join"
       if (extendLeft) {
         sources = sources.map(nullableSource)
         output = output.map(nullableColumn)
@@ -87,18 +111,35 @@ export namespace Source {
       if (clause.using?.length) {
         const common = new Set(clause.using)
         for (const name of common) {
-          if (clause.type === "full join") coalesced.add(name)
-          else if (clause.type === "right join") coalesced.delete(name)
+          if (clause.type === "full join") {
+            coalesced.add(name)
+          } else if (clause.type === "right join") {
+            coalesced.delete(name)
+          }
         }
-        output = output.map(column => {
-          if (!common.has(column.name)) return column
-          const left = leftOutput.find(candidate => candidate.name === column.name)!
-          const rightColumn = right.tableData.columns.find(candidate => candidate.name === column.name)!
-          if (clause.type === "right join") return rightColumn
-          if (clause.type === "full join") return Projection.merge([left, rightColumn])
+        output = output.map((column) => {
+          if (!common.has(column.name)) {
+            return column
+          }
+          const left = leftOutput.find(
+            (candidate) => candidate.name === column.name,
+          )!
+          const rightColumn = right.tableData.columns.find(
+            (candidate) => candidate.name === column.name,
+          )!
+          if (clause.type === "right join") {
+            return rightColumn
+          }
+          if (clause.type === "full join") {
+            return Projection.merge([left, rightColumn])
+          }
           return left
         })
-        output.push(...incoming.tableData.columns.filter(column => !common.has(column.name)))
+        output.push(
+          ...incoming.tableData.columns.filter(
+            (column) => !common.has(column.name),
+          ),
+        )
       } else {
         output.push(...incoming.tableData.columns)
       }
@@ -106,27 +147,50 @@ export namespace Source {
     return { sources, output, coalesced }
   }
 
-  export function identifier(scope: Scope, input: string | ColumnRef): ColumnIdentifier {
-    if (typeof input !== "string") return { table: input.table || undefined, column: input.column }
-    if (scope.output.some(column => column.name === input)) return { column: input }
+  export function identifier(
+    scope: Scope,
+    input: string | ColumnRef,
+  ): ColumnIdentifier {
+    if (typeof input !== "string") {
+      return { table: input.table || undefined, column: input.column }
+    }
+    if (scope.output.some((column) => column.name === input)) {
+      return { column: input }
+    }
     for (const source of scope.sources) {
       const name = qualifier(source)
-      if (name && input.startsWith(`${name}.`)) return { table: name, column: input.slice(name.length + 1) }
+      if (name && input.startsWith(`${name}.`)) {
+        return { table: name, column: input.slice(name.length + 1) }
+      }
     }
     return { column: input }
   }
 
-  export function resolve(scope: Scope, identifier: ColumnIdentifier): ColumnData[] {
-    if (identifier.table === undefined) return scope.output.filter(column => column.name === identifier.column)
-    return scope.sources.filter(source => qualifier(source) === identifier.table)
-      .flatMap(source => source.tableData.columns.filter(column => column.name === identifier.column))
+  export function resolve(
+    scope: Scope,
+    identifier: ColumnIdentifier,
+  ): ColumnData[] {
+    if (identifier.table === undefined) {
+      return scope.output.filter((column) => column.name === identifier.column)
+    }
+    return scope.sources
+      .filter((source) => qualifier(source) === identifier.table)
+      .flatMap((source) =>
+        source.tableData.columns.filter(
+          (column) => column.name === identifier.column,
+        ),
+      )
   }
 
   function snapshotSource(source: Data): Data {
     return {
       ...source,
       ...(source.kind === "subquery" ? { query: snapshot(source.query) } : {}),
-      tableData: { ...source.tableData, columns: source.tableData.columns.slice(), constraints: source.tableData.constraints.slice() },
+      tableData: {
+        ...source.tableData,
+        columns: [...source.tableData.columns],
+        constraints: [...source.tableData.constraints],
+      },
     }
   }
 
@@ -135,6 +199,12 @@ export namespace Source {
   }
 
   function nullableSource(source: Data): Data {
-    return { ...source, tableData: { ...source.tableData, columns: source.tableData.columns.map(nullableColumn) } }
+    return {
+      ...source,
+      tableData: {
+        ...source.tableData,
+        columns: source.tableData.columns.map(nullableColumn),
+      },
+    }
   }
 }

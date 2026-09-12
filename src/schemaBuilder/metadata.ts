@@ -17,7 +17,9 @@ export type TableData = {
   readonly constraints: TableConstraintData[]
 }
 
-export type CheckExpression = string | ((name: string, column: ColumnData) => string)
+export type CheckExpression =
+  | string
+  | ((name: string, column: ColumnData) => string)
 
 export type ColumnData = {
   readonly name: string
@@ -36,7 +38,10 @@ export type ForeignKeyData = {
   readonly column: string
 }
 
-export type TableConstraintData = TablePrimaryKeyData | TableUniqueData | TableCheckData
+export type TableConstraintData =
+  | TablePrimaryKeyData
+  | TableUniqueData
+  | TableCheckData
 
 export type TablePrimaryKeyData = {
   readonly type: "primaryKey"
@@ -50,7 +55,9 @@ export type TableUniqueData = {
 
 export type TableCheckData = {
   readonly type: "check"
-  readonly expression: string | ((columns: Record<string, string>, table: TableData) => string)
+  readonly expression:
+    | string
+    | ((columns: Record<string, string>, table: TableData) => string)
 }
 
 export type PrimaryKeyData = {

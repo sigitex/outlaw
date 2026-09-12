@@ -26,7 +26,12 @@ export interface SelectQuery {
   joins?: JoinClause[]
 }
 
-export type JoinType = "join" | "left join" | "right join" | "full join" | "cross join"
+export type JoinType =
+  | "join"
+  | "left join"
+  | "right join"
+  | "full join"
+  | "cross join"
 
 export type JoinTarget = Source.Data
 

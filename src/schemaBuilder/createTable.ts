@@ -31,19 +31,30 @@ export function createTable<Columns extends BuildColumns, Name extends string>(
     columns,
     constraints: [],
   }
-  const by = new Proxy({}, {
-    get(_, col: string) {
-      return (value: unknown) => ({
-        _tag: "RefBy" as const,
-        table: defineTable,
-        column: col,
-        value,
-      })
+  const by = new Proxy(
+    {},
+    {
+      get(_, col: string) {
+        return (value: unknown) => ({
+          _tag: "RefBy" as const,
+          table: defineTable,
+          column: col,
+          value,
+        })
+      },
     },
-  })
-  const defineTable = Object.assign(Source.create({ kind: "table", name, tableData: $meta }), {
-    $kind: "table" as const, $meta, by, primaryKey, unique, check,
-  }) as unknown as BuildTable<Columns, Name>
+  )
+  const defineTable = Object.assign(
+    Source.create({ kind: "table", name, tableData: $meta }),
+    {
+      $kind: "table" as const,
+      $meta,
+      by,
+      primaryKey,
+      unique,
+      check,
+    },
+  ) as unknown as BuildTable<Columns, Name>
   return defineTable
 
   function primaryKey(...columns: (keyof Columns)[]) {
@@ -62,7 +73,11 @@ export function createTable<Columns extends BuildColumns, Name extends string>(
     return defineTable
   }
 
-  function check(expression: string | ((columns: Record<string, string>, table: TableData) => string)) {
+  function check(
+    expression:
+      | string
+      | ((columns: Record<string, string>, table: TableData) => string),
+  ) {
     $meta.constraints.push({
       type: "check",
       expression,

@@ -25,8 +25,9 @@ export type InsertRecord<R> = Partial<R> &
 
 // Deconstruction
 
-export type ColumnsOf<BT> =
-  BT extends { readonly $columns: infer Columns } ? Columns : never
+export type ColumnsOf<BT> = BT extends { readonly $columns: infer Columns }
+  ? Columns
+  : never
 
 export type ColumnTypesOf<BCS> = {
   readonly [BCK in keyof BCS]: InferColumn<BCS[BCK]>
@@ -62,9 +63,15 @@ export type DatabaseApi<
   M extends SchemaMembers,
   C extends Connection = Connection,
 > = {
-  readonly [K in keyof TablesOf<M>]: TableApi<ColumnsOf<TablesOf<M>[K]>, QueryScope.Of<TablesOf<M>[K]>["name"]>
+  readonly [K in keyof TablesOf<M>]: TableApi<
+    ColumnsOf<TablesOf<M>[K]>,
+    QueryScope.Of<TablesOf<M>[K]>["name"]
+  >
 } & {
-  readonly [K in keyof ViewsOf<M>]: ViewApi<QueryScope.Of<ViewsOf<M>[K]>["columns"], QueryScope.Of<ViewsOf<M>[K]>["name"]>
+  readonly [K in keyof ViewsOf<M>]: ViewApi<
+    QueryScope.Of<ViewsOf<M>[K]>["columns"],
+    QueryScope.Of<ViewsOf<M>[K]>["name"]
+  >
 } & {
   readonly connection: C
   readonly transaction: <Result>(
@@ -74,12 +81,23 @@ export type DatabaseApi<
   ) => Promise<Result>
 }
 
-export type ColumnsOfView<BV> =
-  QueryScope.Of<BV>["columns"]
+export type ColumnsOfView<BV> = QueryScope.Of<BV>["columns"]
 
-export type ViewApi<Columns extends QueryScope.Columns, Name extends string = string> = QueryScope.Composition<QueryScope.Initial<QueryScope.State<Name, Columns>>, true>
+export type ViewApi<
+  Columns extends QueryScope.Columns,
+  Name extends string = string,
+> = QueryScope.Composition<
+  QueryScope.Initial<QueryScope.State<Name, Columns>>,
+  true
+>
 
-export type TableApi<Columns, Name extends string = string> = QueryScope.Composition<QueryScope.Initial<QueryScope.State<Name, QueryScope.SchemaColumns<Columns>>>, true> & {
+export type TableApi<
+  Columns,
+  Name extends string = string,
+> = QueryScope.Composition<
+  QueryScope.Initial<QueryScope.State<Name, QueryScope.SchemaColumns<Columns>>>,
+  true
+> & {
   /** Issue an `INSERT` statement. */
   insert<InsertColumns extends Partial<ColumnTypesOf<Columns>>>(
     ...rows: [InsertColumns, ...InsertColumns[]]
@@ -110,7 +128,10 @@ export interface HasWhereClause<Columns> {
   ): this
 }
 
-export type Select<SelectColumns extends QueryScope.Columns, Scope extends QueryScope> = QueryScope.Selection<SelectColumns, Scope, true>
+export type Select<
+  SelectColumns extends QueryScope.Columns,
+  Scope extends QueryScope,
+> = QueryScope.Selection<SelectColumns, Scope, true>
 
 /** Insert statement API. */
 export interface Insert<InsertColumns, Columns, Returning> {

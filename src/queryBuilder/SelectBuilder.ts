@@ -15,13 +15,18 @@ export class SelectBuilder extends SelectQueryBuilder {
 
   async fetch() {
     const rows = await this.connection.query(generateSelect(this.query))
-    return Mappings.results({ name: "", columns: Projection.columns(this.query), constraints: [] }, rows)
+    return Mappings.results(
+      { name: "", columns: Projection.columns(this.query), constraints: [] },
+      rows,
+    )
   }
 
   async first() {
     const results = await this.fetch()
     if (results[0] === undefined) {
-      throw new Error(`Query did not return a result (table: "${this.query.source.tableData.name}").`)
+      throw new Error(
+        `Query did not return a result (table: "${this.query.source.tableData.name}").`,
+      )
     }
     return results[0]
   }

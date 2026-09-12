@@ -1,5 +1,12 @@
 // oxlint-disable typescript/no-explicit-any
-import type { CheckExpression, ColumnData, ColumnRef, IndexData, TableData, ViewData } from "./metadata"
+import type {
+  CheckExpression,
+  ColumnData,
+  ColumnRef,
+  IndexData,
+  TableData,
+  ViewData,
+} from "./metadata"
 import type { Mapping } from "./Mapping"
 import type { Source } from "../queryBuilder/Source"
 import type { QueryScope } from "../queryBuilder/QueryScope"
@@ -32,7 +39,10 @@ export type BuildColumns = {
   readonly [columnName: string]: BuildColumn<any, any>
 }
 
-export type InferColumn<BC> = BC extends { readonly $value?: infer Type; readonly $defined?: infer Defined }
+export type InferColumn<BC> = BC extends {
+  readonly $value?: infer Type
+  readonly $defined?: infer Defined
+}
   ? "notNull" extends Defined
     ? Type
     : "primaryKey" extends Defined
@@ -54,19 +64,33 @@ export type RefBy = {
 type BuildTableDSL<DefineColumns, Name extends string> = {
   readonly $kind: "table"
   readonly $columns: DefineColumns
-  primaryKey: (...columns: (keyof DefineColumns)[]) => BuildTable<DefineColumns, Name>
-  unique: (...columns: (keyof DefineColumns)[]) => BuildTable<DefineColumns, Name>
-  check: (expression: string | ((columns: ColumnNames<DefineColumns>, table: TableData) => string)) => BuildTable<DefineColumns, Name>
+  primaryKey: (
+    ...columns: (keyof DefineColumns)[]
+  ) => BuildTable<DefineColumns, Name>
+  unique: (
+    ...columns: (keyof DefineColumns)[]
+  ) => BuildTable<DefineColumns, Name>
+  check: (
+    expression:
+      | string
+      | ((columns: ColumnNames<DefineColumns>, table: TableData) => string),
+  ) => BuildTable<DefineColumns, Name>
   readonly by: {
     readonly [K in keyof DefineColumns]: (
       value: InferColumn<DefineColumns[K]>,
     ) => RefBy
   }
   readonly $meta: TableData
-  readonly infer: { [Key in keyof DefineColumns]: InferColumn<DefineColumns[Key]> }
+  readonly infer: {
+    [Key in keyof DefineColumns]: InferColumn<DefineColumns[Key]>
+  }
 }
 
-export type BuildTable<DefineColumns, Name extends string = string> = BuildTableDSL<DefineColumns, Name> & Source<Name, QueryScope.SchemaColumns<DefineColumns>>
+export type BuildTable<
+  DefineColumns,
+  Name extends string = string,
+> = BuildTableDSL<DefineColumns, Name> &
+  Source<Name, QueryScope.SchemaColumns<DefineColumns>>
 
 export type AnyBuildTable = {
   readonly $kind: "table"
@@ -74,7 +98,10 @@ export type AnyBuildTable = {
   readonly [key: string]: unknown
 }
 
-export type BuildView<SelectColumns extends QueryScope.Columns = QueryScope.Columns, Name extends string = string> = Source<Name, SelectColumns> & {
+export type BuildView<
+  SelectColumns extends QueryScope.Columns = QueryScope.Columns,
+  Name extends string = string,
+> = Source<Name, SelectColumns> & {
   readonly $kind: "view"
   readonly $meta: ViewData
   readonly $tableData: TableData
@@ -91,7 +118,10 @@ export type BuildIndex = {
   readonly $meta: IndexData
 }
 
-export type SchemaSelect<SelectColumns extends QueryScope.Columns, Scope extends QueryScope> = QueryScope.Selection<SelectColumns, Scope>
+export type SchemaSelect<
+  SelectColumns extends QueryScope.Columns,
+  Scope extends QueryScope,
+> = QueryScope.Selection<SelectColumns, Scope>
 
 export type BuildColumn<Type, Defined extends string> = Omit<
   {
@@ -102,7 +132,9 @@ export type BuildColumn<Type, Defined extends string> = Omit<
       BuildPrimaryKey<Type, Defined | "primaryKey">
     readonly default: (sql: string) => BuildColumn<Type, Defined | "default">
     readonly unique: BuildColumn<Type, Defined | "unique">
-    readonly check: (expression: CheckExpression) => BuildColumn<Type, Defined | "check">
+    readonly check: (
+      expression: CheckExpression,
+    ) => BuildColumn<Type, Defined | "check">
     readonly foreignKey: BuildForeignKey<Type, Defined>
     readonly map: BuildColumnMap<Type, Defined>
   },

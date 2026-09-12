@@ -1,6 +1,12 @@
 import { indent, join, newline, type Node } from "@sigitex/print"
 import { Format } from "../framework"
-import type { Condition, JoinClause, JoinTarget, ColumnIdentifier, SelectCondition } from "../queryBuilder"
+import type {
+  Condition,
+  JoinClause,
+  JoinTarget,
+  ColumnIdentifier,
+  SelectCondition,
+} from "../queryBuilder"
 import { generateSelectNode } from "./generateSelect"
 
 export namespace Clause {
@@ -10,7 +16,9 @@ export namespace Clause {
       indent(
         conditions.map((condition, index) => [
           index > 0 && " and ",
-          typeof condition.column === "string" ? Format.name(condition.column) : identifier(condition.column),
+          typeof condition.column === "string"
+            ? Format.name(condition.column)
+            : identifier(condition.column),
           " ",
           condition.operator,
           condition.arity === 2 && [" ", Format.value(condition.value)],
@@ -28,12 +36,16 @@ export namespace Clause {
   }
 
   export function identifier(column: ColumnIdentifier): string {
-    return column.table === undefined ? Format.identifier(column.column) : `${Format.identifier(column.table)}.${Format.identifier(column.column)}`
+    return column.table === undefined
+      ? Format.identifier(column.column)
+      : `${Format.identifier(column.table)}.${Format.identifier(column.column)}`
   }
 
   export function source(target: JoinTarget): Node {
     return [
-      target.kind === "table" ? Format.identifier(target.name) : ["(", newline, indent([generateSelectNode(target.query)]), ")"],
+      target.kind === "table"
+        ? Format.identifier(target.name)
+        : ["(", newline, indent([generateSelectNode(target.query)]), ")"],
       target.alias !== undefined && [" as ", Format.identifier(target.alias)],
     ]
   }
@@ -56,7 +68,12 @@ export namespace Clause {
               newline,
             ]),
           ),
-        clause.using?.length && ["using (", join(", ", clause.using, Format.identifier), ")", newline],
+        clause.using?.length && [
+          "using (",
+          join(", ", clause.using, Format.identifier),
+          ")",
+          newline,
+        ],
       ]
     })
   }

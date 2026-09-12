@@ -10,21 +10,45 @@ export function generateSelect(query: SelectQuery) {
 export function generateSelectNode(query: SelectQuery): Node {
   return [
     "select ",
-    join(", ", query.selected, projection => {
-      if (projection === "*") return "*"
-      if ("wildcard" in projection) return [Format.identifier(projection.table), ".*"]
-      return [Clause.identifier(projection.column), projection.alias !== undefined && [" as ", Format.identifier(projection.alias)]]
+    join(", ", query.selected, (projection) => {
+      if (projection === "*") {
+        return "*"
+      }
+      if ("wildcard" in projection) {
+        return [Format.identifier(projection.table), ".*"]
+      }
+      return [
+        Clause.identifier(projection.column),
+        projection.alias !== undefined && [
+          " as ",
+          Format.identifier(projection.alias),
+        ],
+      ]
     }),
     newline,
-    "from ", Clause.source(query.source), newline,
+    "from ",
+    Clause.source(query.source),
+    newline,
     query.joins?.length && Clause.joins(query.joins),
     query.conditions?.length && Clause.where(query.conditions),
     query.orderBy?.length && [
       "order by ",
-      join(", ", query.orderBy, sort => [Clause.identifier(sort.column), " ", sort.direction]),
+      join(", ", query.orderBy, (sort) => [
+        Clause.identifier(sort.column),
+        " ",
+        sort.direction,
+      ]),
       newline,
     ],
-    query.limit !== undefined && ["limit ", Format.number(query.limit), newline],
-    query.offset !== undefined && ["offset ", Format.number(query.offset), newline],
+    query.limit !== undefined && [
+      "limit ",
+      Format.number(query.limit),
+      newline,
+    ],
+    query.offset !== undefined && [
+      "offset ",
+      Format.number(query.offset),
+      newline,
+    ],
   ]
 }

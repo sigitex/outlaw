@@ -1,16 +1,7 @@
 // oxlint-disable typescript/no-explicit-any
-import type {
-  Delete,
-  Connection,
-  Insert,
-  Update,
-} from "./api.types"
+import type { Delete, Connection, Insert, Update } from "./api.types"
 import type { TableData } from "../schemaBuilder"
-import {
-  DeleteBuilder,
-  InsertBuilder,
-  UpdateBuilder,
-} from "../queryBuilder"
+import { DeleteBuilder, InsertBuilder, UpdateBuilder } from "../queryBuilder"
 import { SourceBuilder } from "../queryBuilder/SourceBuilder"
 
 export class DatabaseTable extends SourceBuilder {

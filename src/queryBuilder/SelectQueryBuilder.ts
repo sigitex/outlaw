@@ -27,22 +27,39 @@ export class SelectQueryBuilder {
   }
 
   where(column: string | ColumnRef, value: unknown): this
-  where(column: string | ColumnRef, operator: BinaryOperator | UnaryOperator, value?: unknown): this
+  where(
+    column: string | ColumnRef,
+    operator: BinaryOperator | UnaryOperator,
+    value?: unknown,
+  ): this
   where(column: string | ColumnRef, operator: unknown, value?: unknown) {
     const scope = Source.scope(this.query)
     const identifier = Source.identifier(scope, column)
     this.query.conditions ??= []
-    if (typeof operator === "string" && isUnaryOperator(operator) && arguments.length === 2) {
-      this.query.conditions.push({ column: identifier, arity: 1, operator: operator as UnaryOperator })
+    if (
+      typeof operator === "string" &&
+      isUnaryOperator(operator) &&
+      arguments.length === 2
+    ) {
+      this.query.conditions.push({
+        column: identifier,
+        arity: 1,
+        operator: operator as UnaryOperator,
+      })
     } else {
-      const binary = arguments.length === 3 && typeof operator === "string" && isBinaryOperator(operator)
+      const binary =
+        arguments.length === 3 &&
+        typeof operator === "string" &&
+        isBinaryOperator(operator)
       const operand = binary ? value : operator
       const columns = Source.resolve(scope, identifier)
-      const mapping = columns.length ? Projection.merge(columns).mapping : undefined
+      const mapping = columns.length
+        ? Projection.merge(columns).mapping
+        : undefined
       this.query.conditions.push({
         column: identifier,
         arity: 2,
-        operator: binary ? operator as BinaryOperator : "=",
+        operator: binary ? (operator as BinaryOperator) : "=",
         value: mapping && operand !== null ? mapping.to(operand) : operand,
       })
     }
@@ -53,8 +70,11 @@ export class SelectQueryBuilder {
     const scope = Source.scope(this.query)
     const outputs = Projection.columns(this.query)
     this.query.orderBy = sorts.map(([column, direction]) => ({
-      column: typeof column === "string" && outputs.some(output => output.name === column)
-        ? { column } : Source.identifier(scope, column),
+      column:
+        typeof column === "string" &&
+        outputs.some((output) => output.name === column)
+          ? { column }
+          : Source.identifier(scope, column),
       direction,
     }))
     return this

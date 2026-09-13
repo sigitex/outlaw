@@ -1,37 +1,31 @@
-// oxlint-disable typescript/no-explicit-any
-import type { Connection, Select } from "../api"
-import type { TableData } from "../schemaBuilder"
-import { generateSelect } from "../queryGenerator"
+import type { Connection } from "../api/api.types"
+import { generateSelect } from "../queryGenerator/generateSelect"
 import { Mappings } from "./Mappings"
+import { Projection } from "./Projection"
 import { SelectQueryBuilder } from "./SelectQueryBuilder"
+import type { SelectQuery } from "./queryBuilders.types"
 
-/** Constructs declarative `SELECT` statements with connection-based execution. */
-export class SelectBuilder extends SelectQueryBuilder implements Select<any, any> {
+export class SelectBuilder extends SelectQueryBuilder {
   readonly connection: Connection
 
-  constructor(
-    connection: Connection,
-    table: TableData,
-    columns: "*" | string[],
-  ) {
-    super(table, columns)
+  constructor(connection: Connection, query: SelectQuery) {
+    super(query)
     this.connection = connection
   }
 
-  async fetch(): Promise<any[]> {
+  async fetch() {
     const rows = await this.connection.query(generateSelect(this.query))
-    const tables = [
-      this.table,
-      ...(this.query.joins?.map((j) => j.target.tableData) ?? []),
-    ]
-    return Mappings.results(tables, rows)
+    return Mappings.results(
+      { name: "", columns: Projection.columns(this.query), constraints: [] },
+      rows,
+    )
   }
 
-  async first(): Promise<any> {
+  async first() {
     const results = await this.fetch()
     if (results[0] === undefined) {
       throw new Error(
-        `Query did not return a result (table: "${this.table.name}").`,
+        `Query did not return a result (table: "${this.query.source.tableData.name}").`,
       )
     }
     return results[0]

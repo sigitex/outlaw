@@ -1,4 +1,5 @@
 export * from "./Mapping"
+export { ColumnRef } from "./ColumnRef"
 export * from "./metadata"
 export * from "./schemaBuilder.types"
 export * from "./createSchema"

@@ -1,23 +1,45 @@
-// oxlint-disable typescript/no-explicit-any
-import type { Connection, Select, ViewApi } from "./api.types"
+import type { Connection } from "./api.types"
 import type { TableData } from "../schemaBuilder"
-import { SelectBuilder } from "../queryBuilder"
+import { QuerySourceBuilder } from "../queryBuilder/QuerySourceBuilder"
+import type { QuerySource } from "../queryBuilder/QuerySource"
+import type { Projection } from "../queryBuilder/Projection"
 
-export class DatabaseView implements ViewApi<any> {
-  private connection: Connection
-  private tableData: TableData
+export class DatabaseView {
+  private readonly connection: Connection
+  private readonly source: QuerySource.Data
 
   constructor(connection: Connection, tableData: TableData) {
     this.connection = connection
-    this.tableData = tableData
+    this.source = { kind: "table", name: tableData.name, tableData }
   }
 
-  select(all: "*"): Select<any, any>
-  select<Column extends string>(
-    ...columns: Column[]
-  ): Select<Pick<any, any>, any>
-  select(...columns: ("*" | string)[]): Select<any, any> {
-    const selected = columns[0] === "*" || columns.length === 0 ? "*" : columns
-    return new SelectBuilder(this.connection, this.tableData, selected)
+  select(...columns: Projection.Input[]) {
+    return new QuerySourceBuilder(this.source, this.connection).select(
+      ...columns,
+    )
+  }
+
+  join(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).join(target)
+  }
+
+  leftJoin(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).leftJoin(target)
+  }
+
+  rightJoin(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).rightJoin(
+      target,
+    )
+  }
+
+  fullJoin(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).fullJoin(target)
+  }
+
+  crossJoin(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).crossJoin(
+      target,
+    )
   }
 }

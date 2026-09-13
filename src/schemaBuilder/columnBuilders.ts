@@ -1,5 +1,10 @@
 // oxlint-disable typescript/no-explicit-any
-import type { CheckExpression, ColumnData, ColumnRef, MappingData } from "./metadata"
+import type {
+  CheckExpression,
+  ColumnData,
+  ColumnRef,
+  MappingData,
+} from "./metadata"
 import { Mapping } from "./Mapping"
 import type {
   BuildColumn,
@@ -49,7 +54,7 @@ function composeColumn(
         references(ref: ColumnRef) {
           return composeColumn({
             ...$meta,
-            foreignKey: ref,
+            foreignKey: { table: ref.table, column: ref.column },
           })
         },
       }

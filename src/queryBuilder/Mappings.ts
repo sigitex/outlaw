@@ -41,7 +41,7 @@ export namespace Mappings {
     return rows.map((row) => {
       const mapped: Record<string, unknown> = { ...row }
       for (const [name, mapping] of mappings) {
-        if (name in mapped) {
+        if (name in mapped && mapped[name] !== null) {
           mapped[name] = mapping.from(mapped[name])
         }
       }

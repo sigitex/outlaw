@@ -1,19 +1,24 @@
 import { indent, join, newline, type Node } from "@sigitex/print"
 import { Format } from "../framework"
-import type { Condition, JoinClause, JoinTarget } from "../queryBuilder"
-import type { ColumnRef } from "../schemaBuilder"
+import type {
+  Condition,
+  JoinClause,
+  JoinTarget,
+  ColumnIdentifier,
+  SelectCondition,
+} from "../queryBuilder"
 import { generateSelectNode } from "./generateSelect"
 
 export namespace Clause {
-  export function where(conditions: Condition[], baseTable?: string): Node[] {
+  export function where(conditions: (Condition | SelectCondition)[]): Node[] {
     return [
       "where ",
       indent(
         conditions.map((condition, index) => [
           index > 0 && " and ",
-          baseTable
-            ? qualifyColumn(baseTable, condition.column)
-            : Format.name(condition.column),
+          typeof condition.column === "string"
+            ? Format.name(condition.column)
+            : identifier(condition.column),
           " ",
           condition.operator,
           condition.arity === 2 && [" ", Format.value(condition.value)],
@@ -30,50 +35,46 @@ export namespace Clause {
     return ["returning ", join(", ", columns, Format.name), newline]
   }
 
-  export function joins(
-    clauses: JoinClause[],
-    aliasMap: Map<JoinClause, string>,
-  ): Node {
+  export function identifier(column: ColumnIdentifier): string {
+    return column.table === undefined
+      ? Format.identifier(column.column)
+      : `${Format.identifier(column.table)}.${Format.identifier(column.column)}`
+  }
+
+  export function source(target: JoinTarget): Node {
+    return [
+      target.kind === "table"
+        ? Format.identifier(target.name)
+        : ["(", newline, indent([generateSelectNode(target.query)]), ")"],
+      target.alias !== undefined && [" as ", Format.identifier(target.alias)],
+    ]
+  }
+
+  export function joins(clauses: JoinClause[]): Node {
     return clauses.map((clause) => {
       const { type, on } = clause
-      const alias = aliasMap.get(clause)!
       return [
         type,
         " ",
-        formatTarget(clause.target, alias),
+        source(clause.target),
         newline,
         on.length > 0 &&
           indent(
             on.map(({ left, operator, right }, index) => [
               index === 0 ? "on " : "and ",
-              formatRef(left),
+              identifier(left),
               ` ${operator} `,
-              formatRef(right),
+              identifier(right),
               newline,
             ]),
           ),
+        clause.using?.length && [
+          "using (",
+          join(", ", clause.using, Format.identifier),
+          ")",
+          newline,
+        ],
       ]
     })
   }
-}
-
-function formatTarget(target: JoinTarget, alias: string): Node {
-  if (target.kind === "table") {
-    return Format.name(target.name)
-  }
-  return [
-    "(",
-    newline,
-    indent([generateSelectNode(target.query)]),
-    ") as ",
-    Format.name(alias),
-  ]
-}
-
-function formatRef(ref: ColumnRef): string {
-  return `${Format.name(ref.table)}.${Format.name(ref.column)}`
-}
-
-function qualifyColumn(baseTable: string, column: string): string {
-  return `${Format.name(baseTable)}.${Format.name(column)}`
 }

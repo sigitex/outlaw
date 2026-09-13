@@ -3,19 +3,22 @@ import { ColumnRef } from "../schemaBuilder/ColumnRef"
 import type { ColumnData, TableData } from "../schemaBuilder/metadata"
 import type { QueryScope } from "./QueryScope"
 import type { SelectQuery, ColumnIdentifier } from "./queryBuilders.types"
-import { SourceBuilder } from "./SourceBuilder"
+import { QuerySourceBuilder } from "./QuerySourceBuilder"
 import { Projection } from "./Projection"
 
-export type Source<Name extends string, Columns extends QueryScope.Columns> = {
-  readonly $source: Source.Data
+export type QuerySource<
+  Name extends string,
+  Columns extends QueryScope.Columns,
+> = {
+  readonly $source: QuerySource.Data
   readonly $type: QueryScope.State<Name, Columns>
   readonly all: ColumnRef.Wildcard<Name>
-  as<Alias extends string>(alias: Alias): Source<Alias, Columns>
+  as<Alias extends string>(alias: Alias): QuerySource<Alias, Columns>
 } & {
   readonly [Key in keyof Columns & string]: ColumnRef<Name, Key>
 } & QueryScope.Composition<QueryScope.Initial<QueryScope.State<Name, Columns>>>
 
-export namespace Source {
+export namespace QuerySource {
   export type Data = (
     | { kind: "table"; name: string }
     | { kind: "subquery"; query: SelectQuery }
@@ -34,7 +37,7 @@ export namespace Source {
   export function create(
     data: Data,
     connection?: Connection,
-  ): Source<string, QueryScope.Columns> {
+  ): QuerySource<string, QueryScope.Columns> {
     const source = snapshotSource(data)
     const name = qualifier(source)
     const result = {
@@ -44,22 +47,22 @@ export namespace Source {
         return create({ ...source, alias }, connection)
       },
       select(...columns: Projection.Input[]) {
-        return new SourceBuilder(source, connection).select(...columns)
+        return new QuerySourceBuilder(source, connection).select(...columns)
       },
       join(target: Input) {
-        return new SourceBuilder(source, connection).join(target)
+        return new QuerySourceBuilder(source, connection).join(target)
       },
       leftJoin(target: Input) {
-        return new SourceBuilder(source, connection).leftJoin(target)
+        return new QuerySourceBuilder(source, connection).leftJoin(target)
       },
       rightJoin(target: Input) {
-        return new SourceBuilder(source, connection).rightJoin(target)
+        return new QuerySourceBuilder(source, connection).rightJoin(target)
       },
       fullJoin(target: Input) {
-        return new SourceBuilder(source, connection).fullJoin(target)
+        return new QuerySourceBuilder(source, connection).fullJoin(target)
       },
       crossJoin(target: Input) {
-        return new SourceBuilder(source, connection).crossJoin(target)
+        return new QuerySourceBuilder(source, connection).crossJoin(target)
       },
     }
     for (const column of source.tableData.columns) {
@@ -68,7 +71,7 @@ export namespace Source {
         enumerable: true,
       })
     }
-    return result as unknown as Source<string, QueryScope.Columns>
+    return result as unknown as QuerySource<string, QueryScope.Columns>
   }
 
   export function target(input: Input): Data {

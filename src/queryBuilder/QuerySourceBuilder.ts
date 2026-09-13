@@ -1,17 +1,17 @@
 import type { BinaryOperator, Connection } from "../api/api.types"
 import type { ColumnRef } from "../schemaBuilder/ColumnRef"
 import { Projection } from "./Projection"
-import { Source } from "./Source"
+import { QuerySource } from "./QuerySource"
 import { SelectBuilder } from "./SelectBuilder"
 import { SelectQueryBuilder } from "./SelectQueryBuilder"
 import type { JoinType, SelectQuery } from "./queryBuilders.types"
 
-export class SourceBuilder {
+export class QuerySourceBuilder {
   private readonly query: SelectQuery
   private readonly connection?: Connection
 
   constructor(
-    source: Source.Data,
+    source: QuerySource.Data,
     connection?: Connection,
     query?: SelectQuery,
   ) {
@@ -20,8 +20,8 @@ export class SourceBuilder {
   }
 
   select(...columns: Projection.Input[]) {
-    const query = Source.snapshot(this.query)
-    const scope = Source.scope(query)
+    const query = QuerySource.snapshot(this.query)
+    const scope = QuerySource.scope(query)
     query.selected = columns.length
       ? columns.map((column) => Projection.create(scope, column))
       : ["*"]
@@ -30,19 +30,19 @@ export class SourceBuilder {
       : new SelectQueryBuilder(query)
   }
 
-  join(target: Source.Input) {
+  join(target: QuerySource.Input) {
     return this.addJoin("join", target)
   }
-  leftJoin(target: Source.Input) {
+  leftJoin(target: QuerySource.Input) {
     return this.addJoin("left join", target)
   }
-  rightJoin(target: Source.Input) {
+  rightJoin(target: QuerySource.Input) {
     return this.addJoin("right join", target)
   }
-  fullJoin(target: Source.Input) {
+  fullJoin(target: QuerySource.Input) {
     return this.addJoin("full join", target)
   }
-  crossJoin(target: Source.Input) {
+  crossJoin(target: QuerySource.Input) {
     return this.addJoin("cross join", target)
   }
 
@@ -51,26 +51,26 @@ export class SourceBuilder {
     operator: BinaryOperator,
     right: string | ColumnRef,
   ) {
-    const query = Source.snapshot(this.query)
-    const scope = Source.scope(query)
+    const query = QuerySource.snapshot(this.query)
+    const scope = QuerySource.scope(query)
     query.joins![query.joins!.length - 1].on.push({
-      left: Source.identifier(scope, left),
+      left: QuerySource.identifier(scope, left),
       operator,
-      right: Source.identifier(scope, right),
+      right: QuerySource.identifier(scope, right),
     })
-    return new SourceBuilder(query.source, this.connection, query)
+    return new QuerySourceBuilder(query.source, this.connection, query)
   }
 
   using(...columns: string[]) {
-    const query = Source.snapshot(this.query)
+    const query = QuerySource.snapshot(this.query)
     query.joins![query.joins!.length - 1].using = columns
-    return new SourceBuilder(query.source, this.connection, query)
+    return new QuerySourceBuilder(query.source, this.connection, query)
   }
 
-  private addJoin(type: JoinType, input: Source.Input) {
-    const query = Source.snapshot(this.query)
+  private addJoin(type: JoinType, input: QuerySource.Input) {
+    const query = QuerySource.snapshot(this.query)
     query.joins ??= []
-    query.joins.push({ type, target: Source.target(input), on: [] })
-    return new SourceBuilder(query.source, this.connection, query)
+    query.joins.push({ type, target: QuerySource.target(input), on: [] })
+    return new QuerySourceBuilder(query.source, this.connection, query)
   }
 }

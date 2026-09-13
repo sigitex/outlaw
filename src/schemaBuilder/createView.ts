@@ -3,7 +3,7 @@ import { generateSelectNode } from "../queryGenerator/generateSelect"
 import type { SelectQueryBuilder } from "../queryBuilder/SelectQueryBuilder"
 import { Projection } from "../queryBuilder/Projection"
 import type { QueryScope } from "../queryBuilder/QueryScope"
-import { Source } from "../queryBuilder/Source"
+import { QuerySource } from "../queryBuilder/QuerySource"
 import type { TableData, ViewData } from "./metadata"
 import type { BuildView } from "./schemaBuilder.types"
 
@@ -23,7 +23,7 @@ export function createView<
     constraints: [],
   }
   return Object.assign(
-    Source.create({ kind: "table", name, tableData: $tableData }),
+    QuerySource.create({ kind: "table", name, tableData: $tableData }),
     {
       $kind: "view" as const,
       $meta,

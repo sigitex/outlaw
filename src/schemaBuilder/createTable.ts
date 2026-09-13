@@ -4,7 +4,7 @@ import type {
   BuildColumnInner,
   BuildTable,
 } from "./schemaBuilder.types"
-import { Source } from "../queryBuilder/Source"
+import { QuerySource } from "../queryBuilder/QuerySource"
 
 export function createTable<Columns extends BuildColumns, Name extends string>(
   name: Name,
@@ -45,7 +45,7 @@ export function createTable<Columns extends BuildColumns, Name extends string>(
     },
   )
   const defineTable = Object.assign(
-    Source.create({ kind: "table", name, tableData: $meta }),
+    QuerySource.create({ kind: "table", name, tableData: $meta }),
     {
       $kind: "table" as const,
       $meta,

@@ -1,6 +1,6 @@
 // oxlint-disable typescript/consistent-type-definitions -- review
 import type { BinaryOperator, UnaryOperator } from "../api/api.types"
-import type { Source } from "./Source"
+import type { QuerySource } from "./QuerySource"
 import type { Projection } from "./Projection"
 
 export type ColumnIdentifier = { table?: string; column: string }
@@ -11,7 +11,7 @@ export type SelectCondition =
 /** Represents a select query. */
 export interface SelectQuery {
   /** Table this query is performed on. */
-  source: Source.Data
+  source: QuerySource.Data
   /** Limit clause. */
   limit?: number
   /** Offset clause. */
@@ -33,7 +33,7 @@ export type JoinType =
   | "full join"
   | "cross join"
 
-export type JoinTarget = Source.Data
+export type JoinTarget = QuerySource.Data
 
 export interface JoinClause {
   /** The type of join. */

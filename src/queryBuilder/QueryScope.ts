@@ -1,7 +1,7 @@
 import type { BinaryOperator, UnaryOperator } from "../api/api.types"
 import type { ColumnRef } from "../schemaBuilder/ColumnRef"
 import type { InferColumn } from "../schemaBuilder/schemaBuilder.types"
-import type { Source } from "./Source"
+import type { QuerySource } from "./QuerySource"
 import type { JoinType } from "./queryBuilders.types"
 
 export type QueryScope = {
@@ -115,19 +115,19 @@ export namespace QueryScope {
     select<const Inputs extends readonly Projection<Scope>[]>(
       ...columns: Inputs
     ): Selection<Project<Scope, Inputs>, Scope, Executable>
-    join<Target extends Source.Target>(
+    join<Target extends QuerySource.Target>(
       target: Target,
     ): Joined<Scope, Of<Target>, "join", Executable>
-    leftJoin<Target extends Source.Target>(
+    leftJoin<Target extends QuerySource.Target>(
       target: Target,
     ): Joined<Scope, Of<Target>, "left join", Executable>
-    rightJoin<Target extends Source.Target>(
+    rightJoin<Target extends QuerySource.Target>(
       target: Target,
     ): Joined<Scope, Of<Target>, "right join", Executable>
-    fullJoin<Target extends Source.Target>(
+    fullJoin<Target extends QuerySource.Target>(
       target: Target,
     ): Joined<Scope, Of<Target>, "full join", Executable>
-    crossJoin<Target extends Source.Target>(
+    crossJoin<Target extends QuerySource.Target>(
       target: Target,
     ): Joined<Scope, Of<Target>, "cross join", Executable>
   }
@@ -162,7 +162,7 @@ export namespace QueryScope {
     Executable extends boolean = false,
   > = {
     readonly $type: State<"", Fields>
-    as<Name extends string>(name: Name): Source<Name, Fields>
+    as<Name extends string>(name: Name): QuerySource<Name, Fields>
     where<const Input extends Identifier<Scope>>(
       column: Input,
       value: Value<Resolve<Scope, NoInfer<Input>>> | UnaryOperator,

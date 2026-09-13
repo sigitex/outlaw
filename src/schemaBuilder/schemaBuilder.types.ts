@@ -8,7 +8,7 @@ import type {
   ViewData,
 } from "./metadata"
 import type { Mapping } from "./Mapping"
-import type { Source } from "../queryBuilder/Source"
+import type { QuerySource } from "../queryBuilder/QuerySource"
 import type { QueryScope } from "../queryBuilder/QueryScope"
 
 export type SchemaMembers = {
@@ -90,7 +90,7 @@ export type BuildTable<
   DefineColumns,
   Name extends string = string,
 > = BuildTableDSL<DefineColumns, Name> &
-  Source<Name, QueryScope.SchemaColumns<DefineColumns>>
+  QuerySource<Name, QueryScope.SchemaColumns<DefineColumns>>
 
 export type AnyBuildTable = {
   readonly $kind: "table"
@@ -101,7 +101,7 @@ export type AnyBuildTable = {
 export type BuildView<
   SelectColumns extends QueryScope.Columns = QueryScope.Columns,
   Name extends string = string,
-> = Source<Name, SelectColumns> & {
+> = QuerySource<Name, SelectColumns> & {
   readonly $kind: "view"
   readonly $meta: ViewData
   readonly $tableData: TableData

@@ -2,14 +2,14 @@
 import type { Delete, Connection, Insert, Update } from "./api.types"
 import type { TableData } from "../schemaBuilder"
 import { DeleteBuilder, InsertBuilder, UpdateBuilder } from "../queryBuilder"
-import { SourceBuilder } from "../queryBuilder/SourceBuilder"
-import type { Source } from "../queryBuilder/Source"
+import { QuerySourceBuilder } from "../queryBuilder/QuerySourceBuilder"
+import type { QuerySource } from "../queryBuilder/QuerySource"
 import type { Projection } from "../queryBuilder/Projection"
 
 export class DatabaseTable {
   private readonly connection: Connection
   private table: TableData
-  private readonly source: Source.Data
+  private readonly source: QuerySource.Data
 
   constructor(connection: Connection, table: TableData) {
     this.connection = connection
@@ -18,27 +18,33 @@ export class DatabaseTable {
   }
 
   select(...columns: Projection.Input[]) {
-    return new SourceBuilder(this.source, this.connection).select(...columns)
+    return new QuerySourceBuilder(this.source, this.connection).select(
+      ...columns,
+    )
   }
 
-  join(target: Source.Input) {
-    return new SourceBuilder(this.source, this.connection).join(target)
+  join(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).join(target)
   }
 
-  leftJoin(target: Source.Input) {
-    return new SourceBuilder(this.source, this.connection).leftJoin(target)
+  leftJoin(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).leftJoin(target)
   }
 
-  rightJoin(target: Source.Input) {
-    return new SourceBuilder(this.source, this.connection).rightJoin(target)
+  rightJoin(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).rightJoin(
+      target,
+    )
   }
 
-  fullJoin(target: Source.Input) {
-    return new SourceBuilder(this.source, this.connection).fullJoin(target)
+  fullJoin(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).fullJoin(target)
   }
 
-  crossJoin(target: Source.Input) {
-    return new SourceBuilder(this.source, this.connection).crossJoin(target)
+  crossJoin(target: QuerySource.Input) {
+    return new QuerySourceBuilder(this.source, this.connection).crossJoin(
+      target,
+    )
   }
 
   insert(...rows: [Partial<any>, ...Partial<any>[]]): Insert<any, any, number>

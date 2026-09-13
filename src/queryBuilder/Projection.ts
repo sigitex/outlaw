@@ -1,7 +1,7 @@
 import type { ColumnRef } from "../schemaBuilder/ColumnRef"
 import type { ColumnData } from "../schemaBuilder/metadata"
 import type { ColumnIdentifier, SelectQuery } from "./queryBuilders.types"
-import { Source } from "./Source"
+import { QuerySource } from "./QuerySource"
 
 export type Projection =
   | "*"
@@ -16,14 +16,14 @@ export namespace Projection {
     | ColumnRef.Aliased<string, string, string>
     | ColumnRef.Wildcard
 
-  export function create(scope: Source.Scope, input: Input): Projection {
+  export function create(scope: QuerySource.Scope, input: Input): Projection {
     if (input === "*") {
       return input
     }
     if (typeof input === "object" && "wildcard" in input) {
       return { ...input }
     }
-    const column = Source.identifier(scope, input)
+    const column = QuerySource.identifier(scope, input)
     const alias =
       typeof input === "object" && "alias" in input
         ? input.alias
@@ -37,17 +37,19 @@ export namespace Projection {
   }
 
   export function columns(query: SelectQuery): ColumnData[] {
-    const scope = Source.scope(query)
+    const scope = QuerySource.scope(query)
     const selected = query.selected.flatMap((projection) => {
       if (projection === "*") {
         return scope.output
       }
       if ("wildcard" in projection) {
         return scope.sources
-          .filter((source) => Source.qualifier(source) === projection.table)
+          .filter(
+            (source) => QuerySource.qualifier(source) === projection.table,
+          )
           .flatMap((source) => source.tableData.columns)
       }
-      return Source.resolve(scope, projection.column).map((column) =>
+      return QuerySource.resolve(scope, projection.column).map((column) =>
         renameColumn(column, projection.alias ?? column.name),
       )
     })

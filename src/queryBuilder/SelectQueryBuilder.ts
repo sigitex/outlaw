@@ -1,6 +1,6 @@
 import type { BinaryOperator, UnaryOperator } from "../api/api.types"
 import type { ColumnRef } from "../schemaBuilder/ColumnRef"
-import { Source } from "./Source"
+import { QuerySource } from "./QuerySource"
 import type { SelectQuery } from "./queryBuilders.types"
 import { isBinaryOperator, isUnaryOperator } from "./operators"
 import { Projection } from "./Projection"
@@ -13,7 +13,7 @@ export class SelectQueryBuilder {
   }
 
   as(name: string) {
-    return Source.create({ ...Source.target(this), alias: name })
+    return QuerySource.create({ ...QuerySource.target(this), alias: name })
   }
 
   limit(count: number) {
@@ -33,8 +33,8 @@ export class SelectQueryBuilder {
     value?: unknown,
   ): this
   where(column: string | ColumnRef, operator: unknown, value?: unknown) {
-    const scope = Source.scope(this.query)
-    const identifier = Source.identifier(scope, column)
+    const scope = QuerySource.scope(this.query)
+    const identifier = QuerySource.identifier(scope, column)
     this.query.conditions ??= []
     if (
       typeof operator === "string" &&
@@ -52,7 +52,7 @@ export class SelectQueryBuilder {
         typeof operator === "string" &&
         isBinaryOperator(operator)
       const operand = binary ? value : operator
-      const columns = Source.resolve(scope, identifier)
+      const columns = QuerySource.resolve(scope, identifier)
       const mapping = columns.length
         ? Projection.merge(columns).mapping
         : undefined
@@ -67,14 +67,14 @@ export class SelectQueryBuilder {
   }
 
   orderBy(sorts: readonly (readonly [string | ColumnRef, "asc" | "desc"])[]) {
-    const scope = Source.scope(this.query)
+    const scope = QuerySource.scope(this.query)
     const outputs = Projection.columns(this.query)
     this.query.orderBy = sorts.map(([column, direction]) => ({
       column:
         typeof column === "string" &&
         outputs.some((output) => output.name === column)
           ? { column }
-          : Source.identifier(scope, column),
+          : QuerySource.identifier(scope, column),
       direction,
     }))
     return this

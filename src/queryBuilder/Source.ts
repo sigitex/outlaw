@@ -37,13 +37,31 @@ export namespace Source {
   ): Source<string, QueryScope.Columns> {
     const source = snapshotSource(data)
     const name = qualifier(source)
-    const result = Object.assign(new SourceBuilder(source, connection), {
+    const result = {
       $source: source,
       all: { table: name, wildcard: true as const },
       as(alias: string) {
         return create({ ...source, alias }, connection)
       },
-    })
+      select(...columns: Projection.Input[]) {
+        return new SourceBuilder(source, connection).select(...columns)
+      },
+      join(target: Input) {
+        return new SourceBuilder(source, connection).join(target)
+      },
+      leftJoin(target: Input) {
+        return new SourceBuilder(source, connection).leftJoin(target)
+      },
+      rightJoin(target: Input) {
+        return new SourceBuilder(source, connection).rightJoin(target)
+      },
+      fullJoin(target: Input) {
+        return new SourceBuilder(source, connection).fullJoin(target)
+      },
+      crossJoin(target: Input) {
+        return new SourceBuilder(source, connection).crossJoin(target)
+      },
+    }
     for (const column of source.tableData.columns) {
       Object.defineProperty(result, column.name, {
         value: ColumnRef.create(name, column.name),

@@ -135,6 +135,32 @@ test("source and projection aliases do not mutate schema metadata", () => {
   expect(users.all).toEqual({ table: "users", wildcard: true })
 })
 
+test("sources remain plain objects without query-builder state", () => {
+  const sources = [
+    users,
+    users.as("managers"),
+    db.posts.select("userId", "title").as("selectedPosts"),
+  ]
+  for (const source of sources) {
+    expect(Object.getPrototypeOf(source)).toBe(Object.prototype)
+    expect("query" in source).toBe(false)
+    expect("connection" in source).toBe(false)
+    expect("on" in source).toBe(false)
+    expect("using" in source).toBe(false)
+  }
+})
+
+test("entry points create independent query builders", async () => {
+  const first = db.users.select("name").where("id", 1)
+  const second = db.users.select("name").where("id", 2)
+  expect(await first.fetch()).toEqual([{ name: "Wyatt" }])
+  expect(await second.fetch()).toEqual([{ name: "Doc" }])
+  const schemaFirst = users.select("name").where("id", 1)
+  const schemaSecond = users.select("name").where("id", 2)
+  expect(sqlOf(schemaFirst)).toContain("`id` = 1")
+  expect(sqlOf(schemaSecond)).toContain("`id` = 2")
+})
+
 test("foreign-key and index metadata remain plain serializable data", () => {
   const linked = createTable("linked", {
     userId: integer.foreignKey.references(users.id),
